@@ -1,11 +1,27 @@
-SIMULATION AND IMPLEMENTATION OF  COMBINATIONAL LOGIC CIRCUITS
+# SIMULATION AND IMPLEMENTATION OF  COMBINATIONAL LOGIC CIRCUITS
 
-AIM: 
+## AIM: 
  To simulate and synthesis ENCODER, DECODER, MULTIPLEXER, DEMULTIPLEXER, MAGNITUDE COMPARATOR using Xilinx ISE.
 
-APPARATUS REQUIRED:
+## APPARATUS REQUIRED:
 Xilinx 14.7
 Spartan6 FPGA
+## PROCEDURE:
+```
+STEP:1 Start the vivado software, Select and Name the New project.
+
+STEP:2 Select the device family, device, package and speed.
+
+STEP:3 Select new source in the New Project and select Verilog Module as the Source type.
+
+STEP:4 Type the File Name and module name and Click Next and then finish button. Type the code and save it.
+
+STEP:5 Select the run simulation and then run Behavioral Simulation in the Source Window and click the check syntax.
+
+STEP:6 Click the simulation to simulate the program and give the inputs and verify the outputs as per the truth table.
+
+STEP:7 compare the output with truth table.
+```
 
 **LOGIC DIAGRAM**
 
@@ -33,122 +49,196 @@ MAGNITUDE COMPARATOR
 
 ![image](https://github.com/navaneethans/VLSI-LAB-EXP-2/assets/6987778/b2fe7a05-6bf7-4dcb-8f5d-28abbf7ea8c2)
 
+## VERILOG CODE:
 
-  
-PROCEDURE:
-STEP:1  Start  the Xilinx navigator, Select and Name the New project.
-STEP:2  Select the device family, device, package and speed.       
-STEP:3  Select new source in the New Project and select Verilog Module as the Source type.                       
-STEP:4  Type the File Name and Click Next and then finish button. Type the code and save it.
-STEP:5  Select the Behavioral Simulation in the Source Window and click the check syntax.                       
-STEP:6  Click the simulation to simulate the program and  give the inputs and verify the outputs as per the truth table.               
-STEP:7  Select the Implementation in the Sources Window and select the required file in the Processes Window.
-STEP:8  Select Check Syntax from the Synthesize  XST Process. Double Click in the  FloorplanArea/IO/Logic-Post Synthesis process in the User Constraints process group. UCF(User constraint File) is obtained. 
-STEP:9  In the Design Object List Window, enter the pin location for each pin in the Loc column Select save from the File menu.
-STEP:10 Double click on the Implement Design and double click on the Generate Programming File to create a bitstream of the design.(.v) file is converted into .bit file here.
-STEP:11  On the board, by giving required input, the LEDs starts to glow light, indicating the output.
+### 8-3 ENCODER:
+```
+module encoder(d,a,b,c);
 
-VERILOG CODE
+input [7:0]d; output a,b,c;
 
- # encoder
- ```
-module encoder(d,a,b,c) ;
-input [7:0]d;
-output a,b,c;
-or(a,d[4],d[5],d[6],d[7]);
-or(b,d[2],d[3],d[6],d[7]);
-or(c,d[1],d[3],d[5],d[7]);
+or (a,d[4],d[5],d[6],d[7]);
+
+or (b,d[2],d[3],d[6],d[7]);
+
+or (c,d[1],d[3],d[5],d[7]);
+
 endmodule
 ```
+### 3-8 DECODER:
+```
+module decoder(A,E,Y);
 
-# decoder
-```
-module decoder_8(a,b,c,y);
-input a,b,c; 
-output[7:0]y; 
-and gl(y[0],(~a),(~b),(~c)); 
-and g2(y[1],(~a),(~b),(c)); 
-and g3(y[2],(~a),(b),(~c));
-and g4(y[3],(~a),(b),(c));
-and g5(y[4],(a),(~b),(~c));
-and g6(y[5],(a), (~b), (c));
-and g7(y[6], (a), (b), (~c)); 
-and g8(y[7], (a), (b), (c));
-endmodule
-```
+input [1:0]A;
 
-# multiplexer
-```
-module mux(a,b,c,d,s0,s1,y);
-input a,b,c,d,s0,s1;
-output y;
-assign y=s1 ?(s0?d:c):(s0?b:a);
+input E;
+
+output [3:0]Y;
+
+assign Y[0]=~A[1]&~A[0]&E;
+
+assign Y[1]=~A[1]&A[0]&E;
+
+assign Y[2]=A[1]&~A[0]&E;
+
+assign Y[3]=A[1]&A[0]&E;
+
+endmodule
+
+module decoder(A,Y);
+
+input[2:0]A;
+
+output[7:0]Y;
+
+decoder_2_4 d1(A[1:0],~A[2],Y[3:0]);
+
+decoder_2_4 d2(A[1:0],~A[2],Y[7:4]);
+
 endmodule
 ```
-# demultiplixer
+### 8-1 MULTIPLEXER:
 ```
-module demux(in,s0,s1,s2,d0,d1,d2,d3,d4,d5,d6,d7);
-input in,s0,s1,s2;
-output d0,d1,d2,d3,d4,d5,d6,d7;
-assign d0=(in & ~s2 & ~s1 &~s0),
-d1=(in & ~s2 & ~s1 &s0),
-d2=(in & ~s2 & s1 &~s0),
-d3=(in & ~s2 & s1 &s0),
-d4=(in & s2 & ~s1 &~s0),
-d5=(in & s2 & ~s1 &s0),
-d6=(in & s2 & s1 &~s0),
-d7=(in & s2 & s1 &s0);
-endmodule
-```
-# magnitude comparator
-```
-module magcomp(a,b,l,g,e);
-input [3:0]a,b;
-output reg l,g,e;
-always @(*)
+module multi(i,s,y);
+
+input[7:0]i;
+
+input[2:0]s;
+
+output reg y;
+
+always@(*)
+
 begin
-if(a>b)
-begin
-     l=1'b0;
-     g=1'b1;
-     e=1'b0;
+
+case({s[2],s[1],s[0]})
+
+3'b000:y=i[0];
+
+3'b001:y=i[1];
+
+3'b010:y=i[2];
+
+3'b011:y=i[3];
+
+3'b100:y=i[4];
+
+3'b101:y=i[5];
+
+3'b110:y=i[6];
+
+3'b111:y=i[7];
+
+endcase
+
 end
-else if(a<b)
-begin
-     l=1'b1;
-     g=1'b0;
-     e=1'b0;
-end
-else
-begin
-     l=1'b0;
-     g=1'b0;
-     e=1'b1;
-end
-end
+
 endmodule
 ```
-
-
-OUTPUT WAVEFORM
- ENCODER
- ![image](https://github.com/Nithyasree-123/VLSI-LAB-EXP-2/assets/164908713/61f42305-5563-4358-9deb-1b5d3bf1c34f)
+### 1-8 DEMULTIPLEXER:
  
-DECODER
-![image](https://github.com/Nithyasree-123/VLSI-LAB-EXP-2/assets/164908713/e1482718-201a-4c1e-bc97-ca5d5578150f)
+```
+module demultiplexer(d1,d2,d3,d4,d5,d6,d7,d8,i,s0,s1,s2);
 
-MULTIPLIXER
+input i,s0,s1,s2;
 
-![image](https://github.com/Nithyasree-123/VLSI-LAB-EXP-2/assets/164908713/ed63e27e-e21a-4183-a938-f96ef23604b1)
+output d1,d2,d3,d4,d5,d6,d7,d8;
 
-DEMULTIPLIXER
+wire w1,w2,w3;
 
-![image](https://github.com/Nithyasree-123/VLSI-LAB-EXP-2/assets/164908713/5ca8642f-073c-4b55-9063-0926986d9004)
+not g1(w1,s0);
 
-MANGITUDE COMPARATOR
+not g2(w2,s1);
 
-![image](https://github.com/Nithyasree-123/VLSI-LAB-EXP-2/assets/164908713/461ffb53-f125-479e-966c-cf48a49d87a9)
+not g3(w3,s2);
 
-RESULT
+and g4(d1,w1,w2,w3,i);
+
+and g5(d2,w1,w2,s2,i);
+
+and g6(d3,w1,s1,w3,i);
+
+and g7(d4,w1,s1,s2,i);
+
+and g8(d5,s0,w2,w3,i);
+
+and g9(d6,s0,w2,s2,i);
+
+and g10(d7,s0,s1,w3,i);
+
+and g11(d8,s0,s1,s2,i);
+
+endmodule
+
+```
+### 2 BIT MAGNITUDE COMPARATOR :
+```
+module mag_com(a,b,gt,it,eq);
+
+input [3:0]a,b;
+
+output reg gt,it,eq;
+
+always @(a,b)
+
+begin
+
+if(a>b)
+
+begin
+
+gt = 1'b1;
+
+it = 1'b0;
+
+eq = 1'b0;
+
+end
+
+else if(a<b)
+
+begin
+
+gt = 1'b0;
+
+it = 1'b1;
+
+eq = 1'b0;
+
+end
+
+else
+
+begin
+
+gt = 1'b0;
+
+it = 1'b0;
+
+eq = 1'b1;
+
+end
+
+end
+
+endmodule
+```
+## OUTPUT WAVEFORM:
+### ENCODER:
+<img width="838" alt="316725183-304cc633-f99b-4e88-8a8d-e77ef91b9af9" src="https://github.com/Nithyasree-123/VLSI-LAB-EXP-2/assets/164908713/cc60c07b-682e-4cac-9fa3-03c15a00af63">
+
+### DECODER:
+<img width="690" alt="316725214-02c33818-f775-401b-9636-e726b05026c9" src="https://github.com/Nithyasree-123/VLSI-LAB-EXP-2/assets/164908713/d18965b1-bbc8-43de-ab47-9a56fc28d078">
+
+### MULTIPLEXER:
+<img width="773" alt="316725241-5d8655d7-1d55-431c-897c-cbe9763890c6" src="https://github.com/Nithyasree-123/VLSI-LAB-EXP-2/assets/164908713/0f4e0f40-f519-447c-aab3-b512f260a2e1">
+
+### DEMULTIPLIXER:
+<img width="724" alt="316725790-d97851fe-bc5b-4c44-9057-ebbb28f708c6" src="https://github.com/Nithyasree-123/VLSI-LAB-EXP-2/assets/164908713/a535752f-6150-4f37-9ed9-a583823c1604">
+
+### 2 BIT MANGITUDE COMPARATOR:
+<img width="786" alt="316725898-62a21386-fbd6-43ba-b9bd-0ec03cadf3ea" src="https://github.com/Nithyasree-123/VLSI-LAB-EXP-2/assets/164908713/41df3121-3c7b-42dc-a98e-d561d7b8c63e">
+
+## RESULT:
 Hence ENCODER, DECODER, MULTIPLEXER, DEMULTIPLEXER, MAGNITUDE COMPARATOR are simulated and synthesised using Xilinx ISE
 
